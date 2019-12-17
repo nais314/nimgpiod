@@ -1,9 +1,13 @@
 # nimgpiod
 [libgpiod](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/) wrapper for nim lang
 
+**compiler options:**  
+use **-d:bulk** to include bulk gpio functions  
+use **-d:ctxless** to include ctxless gpio functions
+
 tested on Rpi-2  
 event tests are using bcm2835pii lib for pulling line high -> creating events  
-libgpiod v1.4 wrapped, tested with 1.2.3 on Rpi2  
+libgpiod v1.4 wrapped, tested with v1.2.3 on Rpi2  
   
  
 
