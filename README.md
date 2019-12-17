@@ -5,7 +5,7 @@ tested on Rpi-2
 event tests are using bcm2835pii lib for pulling line high -> creating events  
 libgpiod v1.4 wrapped, tested with 1.2.3 on Rpi2  
   
-AFAIK should run as root  
+ 
 
 optional companion-libs:
 * [bcm2835pii - for pull-up](https://github.com/nais314/bcm2835pii)
