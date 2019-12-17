@@ -7,7 +7,7 @@ libgpiod v1.4 wrapped, tested with 1.2.3 on Rpi2
   
  
 
-optional companion-libs:
+optional companion-libs for Raspberry B+ 1..3:
 * [bcm2835pii - for pull-up](https://github.com/nais314/bcm2835pii)
 * [bcm_host - for hw-detect](https://github.com/nais314/bcm_host)
   
