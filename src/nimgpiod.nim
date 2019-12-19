@@ -400,105 +400,106 @@ block bulk_test:
 
 
 block ctxless:
-  var 
-    val:cint
-    offset:cuint=12
-    num_lines:cuint=1
-    active_low=false
-    consumer:cstring="meConsumer"
-    device:cstring="/dev/gpiochip0"
+  when defined(ctxless):
+    var 
+      val:cint
+      offset:cuint=12
+      num_lines:cuint=1
+      active_low=false
+      consumer:cstring="meConsumer"
+      device:cstring="/dev/gpiochip0"
 
-  echo "\n getValue "
-  val = getValue(
-    device,
-    offset,
-    active_low,
-    consumer)
-  if val == -1: 
-    echo "error"
-  else:
-    echo "value = ",val
+    echo "\n getValue "
+    val = getValue(
+      device,
+      offset,
+      active_low,
+      consumer)
+    if val == -1: 
+      echo "error"
+    else:
+      echo "value = ",val
 
-  #....#
-  echo "\n getValueMultiple "
-  var
-    offsets:array[0..63,cuint]
-    values:array[0..63,cint]
+    #....#
+    echo "\n getValueMultiple "
+    var
+      offsets:array[0..63,cuint]
+      values:array[0..63,cint]
 
-  offsets[0]=12
+    offsets[0]=12
 
-  val = getValueMultiple(
-    device,
-    offsets,
-    values,
-    num_lines,
-    active_low,
-    consumer)
+    val = getValueMultiple(
+      device,
+      offsets,
+      values,
+      num_lines,
+      active_low,
+      consumer)
 
-  if val == -1: 
-    echo "error"
-  else:
-    echo "errno = ", val, " values[0] = ", values[0]
+    if val == -1: 
+      echo "error"
+    else:
+      echo "errno = ", val, " values[0] = ", values[0]
 
-  #....#
-  echo "\n setValue "
+    #....#
+    echo "\n setValue "
 
-  var data:cint = 262
-  proc cb(data:pointer){.cdecl.}=
-    echo "\t BANGG! ", cint(cast[ptr cint](data)[])
+    var data:cint = 262
+    proc cb(data:pointer){.cdecl.}=
+      echo "\t BANGG! ", cint(cast[ptr cint](data)[])
 
-  offsets[0]=12
+    offsets[0]=12
 
-  val = setValue(
-    device,
-    offset,
-    value=1.cint,
-    active_low,
-    consumer,
-    cb,
-    data=data.addr)
+    val = setValue(
+      device,
+      offset,
+      value=1.cint,
+      active_low,
+      consumer,
+      cb,
+      data=data.addr)
 
-  if val == -1: 
-    echo "error"
-  else:
-    echo "errno = ",val
+    if val == -1: 
+      echo "error"
+    else:
+      echo "errno = ",val
 
-  #....#
-  echo "\n setValueMultiple "
+    #....#
+    echo "\n setValueMultiple "
 
-  data = 109
+    data = 109
 
-  val = setValueMultiple(
-    device,
-    offsets,
-    values,
-    num_lines,
-    active_low,
-    consumer,
-    cb,
-    data=data.addr)
+    val = setValueMultiple(
+      device,
+      offsets,
+      values,
+      num_lines,
+      active_low,
+      consumer,
+      cb,
+      data=data.addr)
 
-  if val == -1: 
-    echo "error"
-  else:
-    echo "errno = ", val, " values[0] = ", values[0]
+    if val == -1: 
+      echo "error"
+    else:
+      echo "errno = ", val, " values[0] = ", values[0]
 
-  #....#
-  echo "\n findLine "
+    #....#
+    echo "\n findLine "
 
-  var 
-    chipname:cstring="01234567890123456789012345678912"
-    res_offset:cuint=0
-  val = findLine(
-    name="GPIO12",
-    chipname,
-    chipname_size=32.culong,
-    offset=res_offset
-  )
+    var 
+      chipname:cstring="01234567890123456789012345678912"
+      res_offset:cuint=0
+    val = findLine(
+      name="GPIO12",
+      chipname,
+      chipname_size=32.culong,
+      offset=res_offset
+    )
 
-  if val == -1: 
-    echo "error"
-    echo "errno = ", val
-  else:
-    echo "errno = ", val, " chipname = ", chipname
-    
+    if val == -1: 
+      echo "error"
+      echo "errno = ", val
+    else:
+      echo "errno = ", val, " chipname = ", chipname
+      
