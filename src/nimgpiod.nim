@@ -258,248 +258,248 @@ when isMainModule:
 
 
 #[ 
-import bcm2835pii, os
-block thread_poll_test:
-  echo "\n thread_poll_test \n"
-  var gpiochip0: ChipPtr
-  try:
-    gpiochip0 = chipOpen("/dev/gpiochip0")
-    if gpiochip0.isNil : quit("gpiochip0 not available, quitting")
-  except:
-    quit("gpiochip0 not available, quitting")
+  import bcm2835pii, os
+  block thread_poll_test:
+    echo "\n thread_poll_test \n"
+    var gpiochip0: ChipPtr
+    try:
+      gpiochip0 = chipOpen("/dev/gpiochip0")
+      if gpiochip0.isNil : quit("gpiochip0 not available, quitting")
+    except:
+      quit("gpiochip0 not available, quitting")
 
-  echo "getLine(gpiochip0, 12)"
-  var line12 = getLine(gpiochip0, 12)
-  if line12.isNil: quit("failed to get line #12")
-  echo "isUsed(line12) ",isUsed(line12)
-  echo "requestBothEdgesEvents", requestBothEdgesEvents(line12, "gpio test")
-  echo "getValue(line12) ",getValue(line12)
-  echo "isUsed(line12) ",isUsed(line12)
+    echo "getLine(gpiochip0, 12)"
+    var line12 = getLine(gpiochip0, 12)
+    if line12.isNil: quit("failed to get line #12")
+    echo "isUsed(line12) ",isUsed(line12)
+    echo "requestBothEdgesEvents", requestBothEdgesEvents(line12, "gpio test")
+    echo "getValue(line12) ",getValue(line12)
+    echo "isUsed(line12) ",isUsed(line12)
 
-  echo "offset ", offset(line12)
-  echo "name ", name(line12)
-  echo "direction ", direction(line12)
-  echo "consumer ", consumer(line12)
+    echo "offset ", offset(line12)
+    echo "name ", name(line12)
+    echo "direction ", direction(line12)
+    echo "consumer ", consumer(line12)
 
-  echo "eventGetFd ", eventGetFd(line12)
+    echo "eventGetFd ", eventGetFd(line12)
 
-  
-  
-  var errno = bcm2835pii.init()
-  if errno < 0:
-    echo "init failure ", errno
-  else:
-    echo "init success"
-
-  gpio_set_pull(12, Pull.DOWN)
-
-  proc callback(){.gcsafe.}= echo "\n\tBANG!"
-
-  #[ var thr: Thread[LinePtr]
-  proc poller(line: LinePtr){.thread.}=
-    var ts : Timespec
-    ts.tv_sec = 3.Time
-    echo "eventWait "
-    var res = eventWait(line,ts.addr)
-    if res == 1: callback()
-  createThread(thr,poller,line12) ]#
-  type thr_arg = object
-    line: LinePtr
-    cb:proc():void
-
-  var 
-    thr: Thread[thr_arg]
-    tharg: thr_arg
-  tharg.line = line12
-  tharg.cb=callback
-
-  proc poller(v:thr_arg){.thread.}=
-    var ts : Timespec
-    ts.tv_sec = 3.Time
-    echo "eventWait "
-    var res = eventWait(v.line,ts.addr)
-    {.gcsafe.}:
-      if res == 1: v.cb()
-  createThread(thr,poller,tharg)
-
-  gpio_set_pull(12, Pull.UP)
-  os.sleep(10)
-  gpio_set_pull(12, Pull.DOWN)
-
-  release(line12)
-  chipClose(gpiochip0)
-
-
-
-import bcm2835pii, os
-block bulk_test:
-  echo "\n bulk_test \n"
-  var gpiochip0: ChipPtr
-  try:
-    gpiochip0 = chipOpen("/dev/gpiochip0")
-    if gpiochip0.isNil : quit("gpiochip0 not available, quitting")
-  except:
-    quit("gpiochip0 not available, quitting")
-
-  var errno = bcm2835pii.init()
-  if errno < 0:
-    echo "init failure ", errno
-  else:
-    echo "init success"
-
-  echo "getLine(gpiochip0, 12)"
-  var line12 = getLine(gpiochip0, 12)
-  if line12.isNil: quit("failed to get line #12")
-
-  var blines: Line_Bulk
-  blines.bulkInit()
-  blines.bulkAdd(line12)
-
-  var grequest: LineRequestConfig
-  grequest.consumer = "me"
-  grequest.request_type = LINE_REQUEST_DIRECTION_INPUT
-  var def_value: cint = 0
-
-  echo "isUsed(line12) ",isUsed(line12)
-  echo "requestBulk 0? ", requestBulk(blines, grequest,def_value)
-  echo "isUsed(line12) ",isUsed(line12)
-  echo "releaseBulk"
-  releaseBulk(blines)
-
-  echo "isUsed(line12) ",isUsed(line12)
-
-  proc callback(){.gcsafe.}= echo "\n\tBANG!"
-  echo "requestBulkRisingEdgeEvents ",requestBulkRisingEdgeEvents(blines,"consumer")
-  var thr: Thread[LinePtr]
-  proc poller(line: LinePtr){.thread.}=
-    var blines_triggered: Line_Bulk
-    var ts : Timespec
-    ts.tv_sec = 3.Time
-    echo "eventWait "
-    var res = eventWait_bulk(blines,ts.addr, blines_triggered)
-    if res == 1: callback()
-  createThread(thr,poller,line12)
-
-  gpio_set_pull(12, Pull.UP)
-  os.sleep(10)
-  gpio_set_pull(12, Pull.DOWN)
-
-  echo "releaseBulk"
-  releaseBulk(blines)
-
-  release(line12)
-  chipClose(gpiochip0)
-
- ]#
-
-
-
-
-
-
-
-
-block ctxless:
-  when defined(ctxless):
-    var 
-      val:cint
-      offset:cuint=12
-      num_lines:cuint=1
-      active_low=false
-      consumer:cstring="meConsumer"
-      device:cstring="/dev/gpiochip0"
-
-    echo "\n getValue "
-    val = getValue(
-      device,
-      offset,
-      active_low,
-      consumer)
-    if val == -1: 
-      echo "error"
+    
+    
+    var errno = bcm2835pii.init()
+    if errno < 0:
+      echo "init failure ", errno
     else:
-      echo "value = ",val
+      echo "init success"
 
-    #....#
-    echo "\n getValueMultiple "
-    var
-      offsets:array[0..63,cuint]
-      values:array[0..63,cint]
+    gpio_set_pull(12, Pull.DOWN)
 
-    offsets[0]=12
+    proc callback(){.gcsafe.}= echo "\n\tBANG!"
 
-    val = getValueMultiple(
-      device,
-      offsets,
-      values,
-      num_lines,
-      active_low,
-      consumer)
-
-    if val == -1: 
-      echo "error"
-    else:
-      echo "errno = ", val, " values[0] = ", values[0]
-
-    #....#
-    echo "\n setValue "
-
-    var data:cint = 262
-    proc cb(data:pointer){.cdecl.}=
-      echo "\t BANGG! ", cint(cast[ptr cint](data)[])
-
-    offsets[0]=12
-
-    val = setValue(
-      device,
-      offset,
-      value=1.cint,
-      active_low,
-      consumer,
-      cb,
-      data=data.addr)
-
-    if val == -1: 
-      echo "error"
-    else:
-      echo "errno = ",val
-
-    #....#
-    echo "\n setValueMultiple "
-
-    data = 109
-
-    val = setValueMultiple(
-      device,
-      offsets,
-      values,
-      num_lines,
-      active_low,
-      consumer,
-      cb,
-      data=data.addr)
-
-    if val == -1: 
-      echo "error"
-    else:
-      echo "errno = ", val, " values[0] = ", values[0]
-
-    #....#
-    echo "\n findLine "
+    #[ var thr: Thread[LinePtr]
+    proc poller(line: LinePtr){.thread.}=
+      var ts : Timespec
+      ts.tv_sec = 3.Time
+      echo "eventWait "
+      var res = eventWait(line,ts.addr)
+      if res == 1: callback()
+    createThread(thr,poller,line12) ]#
+    type thr_arg = object
+      line: LinePtr
+      cb:proc():void
 
     var 
-      chipname:cstring="01234567890123456789012345678912"
-      res_offset:cuint=0
-    val = findLine(
-      name="GPIO12",
-      chipname,
-      chipname_size=32.culong,
-      offset=res_offset
-    )
+      thr: Thread[thr_arg]
+      tharg: thr_arg
+    tharg.line = line12
+    tharg.cb=callback
 
-    if val == -1: 
-      echo "error"
-      echo "errno = ", val
+    proc poller(v:thr_arg){.thread.}=
+      var ts : Timespec
+      ts.tv_sec = 3.Time
+      echo "eventWait "
+      var res = eventWait(v.line,ts.addr)
+      {.gcsafe.}:
+        if res == 1: v.cb()
+    createThread(thr,poller,tharg)
+
+    gpio_set_pull(12, Pull.UP)
+    os.sleep(10)
+    gpio_set_pull(12, Pull.DOWN)
+
+    release(line12)
+    chipClose(gpiochip0)
+
+
+
+  import bcm2835pii, os
+  block bulk_test:
+    echo "\n bulk_test \n"
+    var gpiochip0: ChipPtr
+    try:
+      gpiochip0 = chipOpen("/dev/gpiochip0")
+      if gpiochip0.isNil : quit("gpiochip0 not available, quitting")
+    except:
+      quit("gpiochip0 not available, quitting")
+
+    var errno = bcm2835pii.init()
+    if errno < 0:
+      echo "init failure ", errno
     else:
-      echo "errno = ", val, " chipname = ", chipname
-      
+      echo "init success"
+
+    echo "getLine(gpiochip0, 12)"
+    var line12 = getLine(gpiochip0, 12)
+    if line12.isNil: quit("failed to get line #12")
+
+    var blines: Line_Bulk
+    blines.bulkInit()
+    blines.bulkAdd(line12)
+
+    var grequest: LineRequestConfig
+    grequest.consumer = "me"
+    grequest.request_type = LINE_REQUEST_DIRECTION_INPUT
+    var def_value: cint = 0
+
+    echo "isUsed(line12) ",isUsed(line12)
+    echo "requestBulk 0? ", requestBulk(blines, grequest,def_value)
+    echo "isUsed(line12) ",isUsed(line12)
+    echo "releaseBulk"
+    releaseBulk(blines)
+
+    echo "isUsed(line12) ",isUsed(line12)
+
+    proc callback(){.gcsafe.}= echo "\n\tBANG!"
+    echo "requestBulkRisingEdgeEvents ",requestBulkRisingEdgeEvents(blines,"consumer")
+    var thr: Thread[LinePtr]
+    proc poller(line: LinePtr){.thread.}=
+      var blines_triggered: Line_Bulk
+      var ts : Timespec
+      ts.tv_sec = 3.Time
+      echo "eventWait "
+      var res = eventWait_bulk(blines,ts.addr, blines_triggered)
+      if res == 1: callback()
+    createThread(thr,poller,line12)
+
+    gpio_set_pull(12, Pull.UP)
+    os.sleep(10)
+    gpio_set_pull(12, Pull.DOWN)
+
+    echo "releaseBulk"
+    releaseBulk(blines)
+
+    release(line12)
+    chipClose(gpiochip0)
+
+  ]#
+
+
+
+
+
+
+
+
+  block ctxless:
+    when defined(ctxless):
+      var 
+        val:cint
+        offset:cuint=12
+        num_lines:cuint=1
+        active_low=false
+        consumer:cstring="meConsumer"
+        device:cstring="/dev/gpiochip0"
+
+      echo "\n getValue "
+      val = getValue(
+        device,
+        offset,
+        active_low,
+        consumer)
+      if val == -1: 
+        echo "error"
+      else:
+        echo "value = ",val
+
+      #....#
+      echo "\n getValueMultiple "
+      var
+        offsets:array[0..63,cuint]
+        values:array[0..63,cint]
+
+      offsets[0]=12
+
+      val = getValueMultiple(
+        device,
+        offsets,
+        values,
+        num_lines,
+        active_low,
+        consumer)
+
+      if val == -1: 
+        echo "error"
+      else:
+        echo "errno = ", val, " values[0] = ", values[0]
+
+      #....#
+      echo "\n setValue "
+
+      var data:cint = 262
+      proc cb(data:pointer){.cdecl.}=
+        echo "\t BANGG! ", cint(cast[ptr cint](data)[])
+
+      offsets[0]=12
+
+      val = setValue(
+        device,
+        offset,
+        value=1.cint,
+        active_low,
+        consumer,
+        cb,
+        data=data.addr)
+
+      if val == -1: 
+        echo "error"
+      else:
+        echo "errno = ",val
+
+      #....#
+      echo "\n setValueMultiple "
+
+      data = 109
+
+      val = setValueMultiple(
+        device,
+        offsets,
+        values,
+        num_lines,
+        active_low,
+        consumer,
+        cb,
+        data=data.addr)
+
+      if val == -1: 
+        echo "error"
+      else:
+        echo "errno = ", val, " values[0] = ", values[0]
+
+      #....#
+      echo "\n findLine "
+
+      var 
+        chipname:cstring="01234567890123456789012345678912"
+        res_offset:cuint=0
+      val = findLine(
+        name="GPIO12",
+        chipname,
+        chipname_size=32.culong,
+        offset=res_offset
+      )
+
+      if val == -1: 
+        echo "error"
+        echo "errno = ", val
+      else:
+        echo "errno = ", val, " chipname = ", chipname
+        
